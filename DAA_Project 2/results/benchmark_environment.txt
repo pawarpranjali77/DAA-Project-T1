@@ -1,7 +1,0 @@
-cores_available=1
-java=21.0.10 (OpenJDK 64-Bit Server VM)
-os=Linux 6.18.44-fc-v80 amd64
-inputs=datasets/data_<size>_A.txt, datasets/data_<size>_B.txt (same as CorrectnessTester)
-timing=median of 7 runs after a global JIT warm-up and 5 per-config warm-up runs, System.nanoTime()
-baseline=NeedlemanWunschParallel.sequentialScore (row-by-row, score only)
-min_parallel_len=512
