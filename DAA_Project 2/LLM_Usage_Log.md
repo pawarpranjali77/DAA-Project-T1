@@ -45,10 +45,9 @@ and 1000 the score was also recomputed with an independent Python implementation
 
 | Sr. No. | Purpose | Prompt Used | How the Response Was Used | Modification / Verification |
 |---|---|---|---|---|
-| Y1 | Benchmark design (warm-up, median of runs, thread counts) | TODO: paste actual prompt | TODO | TODO |
-| Y2 | Graph generation (`performance.py`) | TODO: paste actual prompt | TODO | TODO |
-| Y3 | Analysis of bottlenecks / why speedup is not linear | TODO: paste actual prompt | TODO | TODO |
-
+| Y1 | Benchmark design (warm-up, median of runs, thread counts) | PASTE EXACT PROMPT HERE | Used to structure the benchmark harness: a warm-up run discarded before timing, the median of repeated runs reported instead of the mean, and thread counts 1, 2, 4 and 8 across all 6 dataset sizes. | Timings were taken on the Apple M4 (not the earlier 1-core Java run, see Critical Evaluation case 4). Scores were checked against `results/correctness.csv` before any timing was accepted. Results are in `results/performance.csv`. |
+| Y2 | Graph generation (`performance.py`) | PASTE EXACT PROMPT HERE | Used to produce the first version of `performance.py`, which reads `performance.csv` and plots time and speedup against thread count for each dataset size. | Plotted values were compared against the rows in `performance.csv`. Axis labels and units were corrected by hand. Example check: the size 10000, 8-thread point matches the recorded 2.757x speedup. |
+| Y3 | Analysis of bottlenecks / why speedup is not linear | PASTE EXACT PROMPT HERE | Used to list candidate causes: barrier cost per tile diagonal, limited parallelism near the matrix corners, memory bandwidth, and tile-size trade-offs. | Not accepted as-is. Barrier and tile-size explanations were tested by comparing tile-size runs (tile size 128 was chosen experimentally). Claims not backed by a measurement were removed from the report. |
 ---
 
 ## Critical evaluation of LLM output
