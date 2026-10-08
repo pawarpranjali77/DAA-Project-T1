@@ -59,10 +59,6 @@ The project was evaluated on real DNA datasets of sizes 100, 500, 1000, 2000, 50
 
 Best measured speedup: 2.757x at size 10000 with 8 threads.
 
-## Best speedup graph
-
-![Best speedup graph](results/graphs/speedup.png)
-
 ## Experimental setup
 
 From `results/benchmark_environment.txt`:
