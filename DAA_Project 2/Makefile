@@ -5,7 +5,7 @@ CXXFLAGS ?= -std=c++17 -O2 -Wall -pthread
 SRC      := src
 BIN      := cpp_bin
 
-TARGETS := NeedlemanWunschSequential NeedlemanWunschParallel CorrectnessTester \
+TARGETS := NeedlemanWunschSequential NeedlemanWunschParallel NeedlemanWunschOpenMP CorrectnessTester \
            PerformanceBenchmark PerformanceAnalysis RealDatasetProcessor
 
 all: $(addprefix $(BIN)/,$(TARGETS))
@@ -18,6 +18,10 @@ $(BIN)/NeedlemanWunschSequential: $(SRC)/NeedlemanWunschSequential.cpp | $(BIN)
 
 $(BIN)/NeedlemanWunschParallel: $(SRC)/NeedlemanWunschParallel.cpp | $(BIN)
 	$(CXX) $(CXXFLAGS) -DNEEDLEMANWUNSCHPARALLEL_MAIN $< -o $@
+
+# OpenMP version of the tiled wavefront (needs -fopenmp; links the helpers from the std::thread file)
+$(BIN)/NeedlemanWunschOpenMP: $(SRC)/NeedlemanWunschOpenMP.cpp $(SRC)/NeedlemanWunschParallel.cpp | $(BIN)
+	$(CXX) $(CXXFLAGS) -fopenmp -DNEEDLEMANWUNSCHOPENMP_MAIN $^ -o $@
 
 $(BIN)/CorrectnessTester: $(SRC)/CorrectnessTester.cpp $(SRC)/NeedlemanWunschSequential.cpp $(SRC)/NeedlemanWunschParallel.cpp | $(BIN)
 	$(CXX) $(CXXFLAGS) -DCORRECTNESSTESTER_MAIN $^ -o $@
