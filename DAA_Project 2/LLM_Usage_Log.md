@@ -1,7 +1,7 @@
 # LLM Usage Log
 
 **Project:** Needleman-Wunsch Parallelization (Q3, Biological Sequence Alignment)
-**Team:** Mahi, Pranjali, Fatima, Maitreyi
+**Team:** Mahi, Pranjali, Fathima, Maitreyi
 **Tools used:** Claude (claude.ai) <!-- TEAM: add any other tool you used, e.g. ChatGPT, Copilot -->
 
 Prompts are recorded exactly as typed, including spelling mistakes. Rows marked
@@ -33,7 +33,7 @@ and 1000 the score was also recomputed with an independent Python implementation
 | P4 | Improvement planning | "can you give prompts to improve the whole project and make A tier project give 5 lines ke 3 prompts to solve all the problems" | Received 3 suggested prompts: (1) clean and flatten the repo, (2) fix the slow parallel code and re-benchmark, (3) finish the report, README and viva notes. TODO: record which of these were actually run and what was changed. | TODO: state how each resulting change was verified (e.g. `CorrectnessTester` all PASS, benchmark re-run). |
 | P5 | Requirement compliance check | "now tell if the project is according to this requiremnet some common requirements but like we are goibg to inlcude few things in the report as well but based on htis how much would you rate the project give feedback as well Q3. Biological Sequence Alignment" (the course instruction sheet was attached) | Identified the gaps against the instruction sheet: no OpenMP/MPI/CUDA, missing LLM log, missing individual contribution statements. | Each gap was checked by hand against the instruction sheet. TODO: record what was done for each gap. |
 
-## Fatima: parallel implementation
+## Fathima: parallel implementation
 
 | Sr. No. | Purpose | Prompt Used | How the Response Was Used | Modification / Verification |
 |---|---|---|---|---|
