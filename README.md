@@ -1,105 +1,479 @@
-# Needleman-Wunsch Sequence Alignment (C++)
+```markdown
+# Needleman-Wunsch Sequence Alignment
 
-This project implements the Needleman-Wunsch global alignment algorithm for DNA sequences using a C++ sequential baseline and a parallel wavefront implementation. The work is driven by two core requirements: correctness and performance.
+A high-performance C++ implementation of the **Needleman-Wunsch global sequence alignment algorithm**, developed as a Design and Analysis of Algorithms (DAA) project.
 
-The sequential version computes the full dynamic-programming table and produces the exact score. The parallel version keeps the same scoring logic but computes cells in a blocked wavefront pattern across anti-diagonals to expose parallelism while preserving dependencies.
+The project implements both **sequential and parallel versions**, validates their correctness, and compares their performance across different DNA sequence sizes and thread configurations.
 
-## Project overview
+---
 
-- Sequential baseline: `src/NeedlemanWunschSequential.cpp`
-- Parallel implementation: `src/NeedlemanWunschParallel.cpp`
-- Correctness validation: `src/CorrectnessTester.cpp`
-- Performance benchmarking: `src/PerformanceBenchmark.cpp`
-- Dataset generation: `src/RealDatasetProcessor.cpp`
-- Performance analysis: `src/PerformanceAnalysis.cpp`
-- Graph generation: `performance.py`
+## 1. Project Overview
 
-## Scoring scheme
+Needleman-Wunsch is a dynamic programming algorithm used to find the **optimal global alignment between two biological sequences**.
 
-- Match: +1
-- Mismatch: -1
-- Gap: -2
+For DNA sequences, the algorithm compares:
 
-The recurrence used is:
+- `A` — Adenine
+- `T` — Thymine
+- `C` — Cytosine
+- `G` — Guanine
 
-$$
-F_{i,j} = \max(F_{i-1,j-1} + s(a_i, b_j), F_{i-1,j} - 2, F_{i,j-1} - 2)
-$$
+The project focuses on improving the computational performance of the traditional sequential algorithm using **parallel wavefront processing**.
 
-## Results summary
+### Main Objectives
 
-The project was evaluated on real DNA datasets of sizes 100, 500, 1000, 2000, 5000 and 10000 with thread counts 1, 2, 4 and 8.
+- Implement the sequential Needleman-Wunsch algorithm.
+- Implement a parallel version using C++ threads.
+- Preserve the dependency structure of the dynamic programming matrix.
+- Verify that parallel and sequential implementations produce identical scores.
+- Benchmark different sequence sizes and thread counts.
+- Calculate speedup and efficiency.
+- Analyze the scalability and limitations of parallel execution.
 
-| Size | Threads | Sequential (ms) | Parallel (ms) | Speedup | Efficiency |
-|---:|---:|---:|---:|---:|---:|
-| 100 | 1 | 0.007 | 0.007 | 0.920 | 0.920 |
-| 100 | 2 | 0.007 | 0.023 | 0.290 | 0.145 |
-| 100 | 4 | 0.007 | 0.028 | 0.243 | 0.061 |
-| 100 | 8 | 0.007 | 0.049 | 0.138 | 0.017 |
-| 500 | 1 | 0.185 | 0.185 | 1.000 | 1.000 |
-| 500 | 2 | 0.185 | 0.241 | 0.769 | 0.385 |
-| 500 | 4 | 0.185 | 0.241 | 0.767 | 0.192 |
-| 500 | 8 | 0.185 | 0.331 | 0.560 | 0.070 |
-| 1000 | 1 | 0.743 | 0.741 | 1.004 | 1.004 |
-| 1000 | 2 | 0.743 | 0.780 | 0.954 | 0.477 |
-| 1000 | 4 | 0.743 | 0.690 | 1.078 | 0.269 |
-| 1000 | 8 | 0.743 | 0.903 | 0.823 | 0.103 |
-| 2000 | 1 | 2.968 | 2.969 | 1.000 | 1.000 |
-| 2000 | 2 | 2.968 | 2.715 | 1.093 | 0.547 |
-| 2000 | 4 | 2.968 | 1.512 | 1.963 | 0.491 |
-| 2000 | 8 | 2.968 | 1.617 | 1.835 | 0.229 |
-| 5000 | 1 | 18.586 | 18.575 | 1.001 | 1.001 |
-| 5000 | 2 | 18.586 | 16.029 | 1.160 | 0.580 |
-| 5000 | 4 | 18.586 | 8.886 | 2.092 | 0.523 |
-| 5000 | 8 | 18.586 | 7.757 | 2.396 | 0.299 |
-| 10000 | 1 | 74.333 | 74.628 | 0.996 | 0.996 |
-| 10000 | 2 | 74.333 | 71.507 | 1.040 | 0.520 |
-| 10000 | 4 | 74.333 | 37.168 | 2.000 | 0.500 |
-| 10000 | 8 | 74.333 | 26.958 | 2.757 | 0.345 |
+---
 
-Best measured speedup: 2.757x at size 10000 with 8 threads.
+## 2. Algorithm
 
-## Experimental setup
+Needleman-Wunsch uses a dynamic programming matrix `DP[i][j]`.
 
-From `results/benchmark_environment.txt`:
+Each cell represents the best alignment score between prefixes of the two sequences.
 
-- CPU: Apple M4
-- Available cores: 10
-- Compiler: Apple LLVM 17.0.0 (clang-1700.6.3.2)
-- Flags: `-std=c++17 -O2 -Wall -pthread`
-- Timing method: median of 7 runs after warm-up, using `std::chrono::steady_clock`
-- Dataset sizes: 100, 500, 1000, 2000, 5000, 10000
+The recurrence relation is:
 
-## One-command reproduction
+```text
+DP[i][j] = max(
+    DP[i-1][j-1] + score(sequence1[i-1], sequence2[j-1]),
+    DP[i-1][j]   + gap_penalty,
+    DP[i][j-1]   + gap_penalty
+)
+```
 
-From the project root:
+### Scoring Scheme
 
-```sh
+| Operation | Score |
+|---|---:|
+| Match | +1 |
+| Mismatch | -1 |
+| Gap | -2 |
+
+Initialization:
+
+```text
+DP[0][0] = 0
+
+DP[i][0] = i × gap_penalty
+
+DP[0][j] = j × gap_penalty
+```
+
+---
+
+## 3. Sequential Implementation
+
+The sequential implementation calculates the DP matrix one cell at a time.
+
+```text
+for i = 1 to n
+    for j = 1 to m
+        calculate DP[i][j]
+```
+
+This provides the baseline execution time against which the parallel implementation is compared.
+
+File:
+
+```text
+src/NeedlemanWunschSequential.cpp
+```
+
+---
+
+## 4. Parallel Implementation
+
+The DP matrix cannot simply be divided row-wise or column-wise because every cell depends on three previous cells:
+
+```text
+        DP[i-1][j]
+             ↓
+DP[i][j-1] → DP[i][j] ← DP[i-1][j-1]
+```
+
+Therefore, the project uses **blocked/tiled wavefront parallelism**.
+
+The matrix is divided into blocks:
+
+```text
+        B00
+     B10  B01
+  B20  B11  B02
+B30  B21  B12  B03
+```
+
+Blocks on the same anti-diagonal can be processed simultaneously because their required dependencies have already been completed.
+
+This allows multiple threads to work concurrently while maintaining the correctness of the dynamic programming algorithm.
+
+File:
+
+```text
+src/NeedlemanWunschParallel.cpp
+```
+
+---
+
+## 5. Dataset
+
+The project uses DNA sequence datasets generated from **E. coli genomic data**.
+
+Tested sequence sizes:
+
+```text
+100
+500
+1000
+2000
+5000
+10000
+```
+
+These different sizes help evaluate how the parallel implementation behaves as the computational workload increases.
+
+---
+
+## 6. Correctness Testing
+
+The parallel implementation is tested against the sequential implementation.
+
+For every dataset:
+
+```text
+Parallel Score == Sequential Score
+```
+
+The testing covers:
+
+- Different sequence sizes
+- Different thread counts
+- Sequential vs parallel scores
+
+Files:
+
+```text
+src/CorrectnessTester.cpp
+```
+
+The correctness test ensures that parallel execution does not change the final alignment score.
+
+---
+
+## 7. Performance Benchmarking
+
+Performance is measured for:
+
+```text
+Threads:
+1
+2
+4
+8
+```
+
+For each configuration, execution time is recorded for different sequence sizes.
+
+The benchmark uses:
+
+- `std::chrono::steady_clock`
+- Warm-up execution
+- Multiple repeated runs
+- Median execution time
+
+Using the median reduces the effect of temporary system-level fluctuations.
+
+File:
+
+```text
+src/PerformanceBenchmark.cpp
+```
+
+---
+
+## 8. Performance Metrics
+
+### Speedup
+
+Speedup measures how much faster the parallel implementation is compared with the sequential implementation.
+
+```text
+Speedup = Sequential Time / Parallel Time
+```
+
+### Efficiency
+
+Efficiency measures how effectively the available threads are being used.
+
+```text
+Efficiency = Speedup / Number of Threads
+```
+
+---
+
+## 9. Performance Results
+
+### Best Result
+
+For a sequence size of **10,000**:
+
+| Configuration | Time |
+|---|---:|
+| Sequential | 74.333 ms |
+| Parallel – 8 Threads | 26.958 ms |
+| Speedup | **2.757×** |
+| Efficiency | **34.5%** |
+
+### Speedup Summary
+
+| Sequence Size | 2 Threads | 4 Threads | 8 Threads |
+|---:|---:|---:|---:|
+| 100 | 0.290× | 0.243× | 0.138× |
+| 500 | 0.769× | 0.767× | 0.560× |
+| 1000 | 0.954× | 1.078× | 0.823× |
+| 2000 | 1.093× | 1.963× | 1.835× |
+| 5000 | 1.160× | 2.092× | 2.396× |
+| 10000 | 1.040× | 2.000× | **2.757×** |
+
+---
+
+## 10. Performance Analysis
+
+The results show that parallelization becomes more beneficial as the sequence size increases.
+
+For small inputs, parallel execution can be slower because the overhead of:
+
+- Thread creation
+- Synchronization
+- Scheduling
+- Memory access
+
+can be larger than the actual computation.
+
+For larger inputs, there is significantly more computation available for the threads, resulting in better speedup.
+
+The highest measured speedup is:
+
+```text
+2.757×
+```
+
+for:
+
+```text
+Sequence Size = 10,000
+Threads = 8
+```
+
+---
+
+## 11. Why Speedup Is Not Linear
+
+The speedup does not increase proportionally with the number of threads.
+
+For example:
+
+```text
+1 thread  → baseline
+2 threads → 1.040×
+4 threads → 2.000×
+8 threads → 2.757×
+```
+
+This is expected because the algorithm contains several sources of overhead.
+
+### Main reasons
+
+1. **Data Dependencies**
+
+   DP cells cannot be calculated independently.
+
+2. **Synchronization**
+
+   Wavefront blocks must wait for dependent blocks.
+
+3. **Uneven Work**
+
+   The number of available blocks changes across different wavefronts.
+
+4. **Thread Overhead**
+
+   Managing multiple threads introduces additional cost.
+
+5. **Memory Access**
+
+   The DP matrix is large and memory access can limit performance.
+
+6. **Sequential Portions**
+
+   Some parts of the algorithm cannot be fully parallelized.
+
+---
+
+## 12. Experimental Environment
+
+The experiments were performed on:
+
+```text
+CPU: Apple M4
+Available Cores: 10
+Compiler: Apple LLVM 17.0.0
+Language: C++17
+Optimization: -O2
+Threading: std::thread
+```
+
+Compilation flags:
+
+```text
+-std=c++17 -O2 -Wall -pthread
+```
+
+Benchmark methodology:
+
+```text
+Warm-up runs
++
+7 measured runs
++
+Median execution time
+```
+
+---
+
+## 13. Project Structure
+
+```text
+DAA-Project-T1/
+│
+├── src/
+│   ├── NeedlemanWunschSequential.cpp
+│   ├── NeedlemanWunschParallel.cpp
+│   ├── CorrectnessTester.cpp
+│   ├── PerformanceBenchmark.cpp
+│   ├── RealDatasetProcessor.cpp
+│   └── PerformanceAnalysis.cpp
+│
+├── results/
+│   ├── correctness.csv
+│   ├── benchmark.csv
+│   └── performance_summary.csv
+│
+├── performance.py
+├── run_all.sh
+├── Makefile
+└── README.md
+```
+
+---
+
+## 14. How to Run
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/pawarpranjali77/DAA-Project-T1.git
+cd DAA-Project-T1
+```
+
+### Compile
+
+```bash
+make
+```
+
+### Run Complete Pipeline
+
+```bash
 ./run_all.sh
 ```
 
-This command rebuilds the project and runs the full pipeline:
+The pipeline performs:
 
-- dataset generation
-- correctness validation
-- performance benchmark
-- summary generation
-- graph creation
+```text
+Dataset Generation
+        ↓
+Correctness Testing
+        ↓
+Performance Benchmarking
+        ↓
+Performance Analysis
+        ↓
+Graph Generation
+```
 
-## Why parallel speedup is not perfect
+---
 
-The measured speedup is below linear for several reasons:
+## 15. Output
 
-1. Thread startup and scheduling overhead is non-zero.
-2. The wavefront still has synchronization points between tiles.
-3. Short diagonals at the start/end of the matrix have very little work, so threads often wait.
-4. Memory access patterns are less cache-friendly than the row-major sequential loop.
-5. Amdahl's law limits the achievable speedup when part of the work remains serial.
+The project generates performance and correctness results that can be used to analyze:
 
-This is visible in the real data: at size 100, 8 threads is slower than the sequential version, and at size 500 the 8-thread run is still only 0.560x speedup. For larger inputs, especially 5000 and 10000, the parallel implementation reaches 2.396x and 2.757x, respectively. This shows that the algorithm scales with problem size but remains limited by synchronization and memory overhead.
+- Execution time
+- Speedup
+- Parallel efficiency
+- Effect of sequence size
+- Effect of thread count
+- Scalability of the parallel algorithm
 
-## Conclusion
+Graphs are generated using:
 
-The C++ project verifies correctness across all six dataset sizes and all tested thread counts, with the sequential and parallel scores matching exactly. The blocked wavefront design is substantially better than the naive barrier-per-diagonal approach, but the measured speedup remains below ideal linear scaling because synchronization, memory access, and serial bottlenecks still dominate for smaller inputs.
+```text
+performance.py
+```
 
-The project is therefore successful as a correctness-preserving and experimentally validated parallel implementation, with the best observed speedup reaching 2.757x on the 10000-size dataset with 8 threads.
+---
+
+## 16. Limitations
+
+The current implementation has some limitations:
+
+- Parallel execution uses `std::thread`.
+- Speedup is limited by DP dependencies.
+- Synchronization introduces overhead.
+- Small datasets may perform better sequentially.
+- Memory usage increases with the size of the DP matrix.
+- Current testing is limited to sequence sizes up to 10,000.
+
+---
+
+## 17. Future Improvements
+
+Possible improvements include:
+
+- Parallel traceback for reconstructing the complete alignment.
+- Rolling anti-diagonal buffers to reduce memory usage.
+- Testing larger inputs such as 20,000 and 50,000.
+- Reusing threads instead of repeatedly creating them.
+- Testing independent or mutated DNA sequences.
+- Stronger dataset validation.
+- Additional edge-case tests.
+- Known-answer test cases.
+- OpenMP implementation.
+- Further performance optimization.
+
+---
+
+## 18. Conclusion
+
+This project demonstrates how the **Needleman-Wunsch dynamic programming algorithm** can be parallelized using a **blocked wavefront approach**.
+
+The implementation maintains correctness while reducing execution time for larger sequences.
+
+The best measured result was:
+
+```text
+Sequence Size : 10,000
+Threads        : 8
+Sequential     : 74.333 ms
+Parallel       : 26.958 ms
+Speedup        : 2.757×
+```
+
+The results show that parallelization is most effective for larger computational workloads, while synchronization and dependency constraints prevent perfectly linear speedup.
+```
