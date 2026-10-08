@@ -59,10 +59,6 @@ The project was evaluated on real DNA datasets of sizes 100, 500, 1000, 2000, 50
 
 Best measured speedup: 2.757x at size 10000 with 8 threads.
 
-## Best speedup graph
-
-![Best speedup graph](results/graphs/speedup.png)
-
 ## Experimental setup
 
 From `results/benchmark_environment.txt`:
@@ -89,13 +85,6 @@ This command rebuilds the project and runs the full pipeline:
 - performance benchmark
 - summary generation
 - graph creation
-
-## Team contributions
-
-- Mahi: dataset generation and data validation strategy
-- Pranjali: project setup, benchmarking workflow, code validation, and documentation
-- Fatima: wavefront parallel algorithm design and C++ implementation
-- Maitreyi: performance analysis and graph generation pipeline
 
 ## Why parallel speedup is not perfect
 
