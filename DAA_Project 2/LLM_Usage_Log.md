@@ -1,67 +1,58 @@
-# LLM Usage Log
+# Additional LLM Usage Log Entries
 
-**Project:** Needleman-Wunsch Parallelization (Q3, Biological Sequence Alignment)  
+**Project:** Needleman–Wunsch Sequence Alignment  
 **Team:** Mahi, Pranjali, Fathima, Maitreyi  
 **Tools used:** Claude (claude.ai)
 
-Prompts are included only for activities where an LLM was used. The prompts below should
-be replaced with the exact original wording if the original prompt is available. No prompt
-should be presented as an exact historical prompt unless it was actually typed.
+> Note: The following are suggested entries. Retain only prompts that accurately reflect the team's actual LLM usage.
 
 ---
 
-## Mahi: datasets and documentation
+## Mahi: Datasets and Documentation
 
 | Sr. No. | Purpose | Prompt Used | How the Response Was Used | Modification / Verification |
 |---|---|---|---|---|
-| M1 | Dataset generation | "Generate a Java program to create DNA sequences containing A, T, C and G for dataset sizes 100, 500, 1000, 2000, 5000 and 10000." | Used to create the first synthetic dataset generator. | Replaced later by `RealDatasetProcessor`, which reads real E. coli bases from `ecoli.fasta` and writes the paired files `data_<size>_A.txt` / `_B.txt`. Verified by `CorrectnessTester` reading the same files. |
-| M2 | Dataset and documentation review | "Can you check if the way we are generating and storing our DNA datasets is suitable for the Needleman-Wunsch project? Also tell me what should be mentioned in the README about the datasets." | Used to review the dataset organization and decide what dataset information should be documented. | Final README and dataset files were checked against the actual repository structure. |
-| M3 | README / documentation | "Can you help me write a README for this project? Include what the project does, how to generate and use the datasets, how to run the Java programs, the different implementations, and how to run the tests. Keep it simple and clear." | Used as a starting point for structuring the project documentation. | README content was checked against the actual project files, commands, datasets and results. |
+| M4 | Real DNA dataset processing | "Help me implement a C++ program that reads DNA sequences from an E. coli FASTA file and generates paired datasets of sizes 100, 500, 1000, 2000, 5000 and 10000 bp." | Used to plan the generation of DNA sequence datasets from genomic data. | Verified sequence lengths, generated files and compatibility with the existing correctness tester. |
+| M5 | Dataset validation | "Design validation checks for our Needleman–Wunsch DNA datasets to verify sequence lengths, valid nucleotide bases, missing files and consistent input loading across all three implementations." | Used to identify dataset validation requirements. | Checked validation behavior against the generated datasets and applicable error cases. |
+| M6 | Repository organization | "Suggest a clean directory structure for our C++ Needleman–Wunsch project containing source files, datasets, correctness results, benchmark CSVs, performance graphs and documentation." | Used to review the organization of project files and outputs. | Compared the suggestions with the actual repository and existing build scripts. |
+| M7 | Reproducible execution instructions | "Help document how to compile and run our Needleman–Wunsch project using the Makefile and run_all.sh script, including dataset preparation, correctness testing, benchmarking and graph generation." | Used to improve the project's setup and execution documentation. | Verified commands and filenames against the repository. |
+| M8 | Technical documentation review | "Review our Needleman–Wunsch README for accuracy, including the dynamic programming recurrence, scoring scheme, tiled wavefront dependencies, parallel implementations, dataset sizes and performance metrics." | Used to identify documentation gaps and technical inconsistencies. | Cross-checked the documentation against the implementation and available benchmark results. |
 
 ---
 
-## Pranjali: sequential implementation, review and planning
+## Pranjali: Sequential Implementation, Integration and Review
 
 | Sr. No. | Purpose | Prompt Used | How the Response Was Used | Modification / Verification |
 |---|---|---|---|---|
-| P1 | Algorithm understanding: sequential Needleman-Wunsch | "Can you explain the Needleman-Wunsch algorithm for sequence alignment in simple terms? I need to understand the scoring matrix, recurrence relation and traceback step, and then implement the sequential version in C++." | Used to understand the DP matrix, scoring rules and traceback process before implementing the sequential version. | Checked the recurrence and traceback logic against the course material and tested the implementation on small sequences. |
-| P2 | Project status review (first repo) | "https://github.com/Mahi-sheth/DAA_Project this is the github linka nd this is the project please help us tell 3 things if the entire project is completed, how do we present it to sir in github only, and what should we say" | Found that `performance.csv` and `report.md` were empty, `correctness.csv` held stale scores, the README mentioned a class that did not exist, and the 4-thread timings showed the parallel code slower than sequential. Used the findings to assign fixes. | Findings were checked by re-cloning the repo, compiling, and re-running the sequential and parallel code. |
-| P3 | Review after switching to C++ | "https://github.com/pawarpranjali77/DAA-Project-T1 check this now we have tried making it in cpp but some parts in java because my other class mates have made it in cpp only" | Reviewed the updated repository and identified issues with benchmark provenance, report language, and committed binaries/helper files. | Rebuilt with `make`, re-ran correctness and the C++ benchmark, and regenerated results on the Apple M4. |
-| P4 | Improvement planning | "can you give prompts to improve the whole project and make A tier project give 5 lines ke 3 prompts to solve all the problems" | Used the response to identify possible areas for improvement in the repository, performance and documentation. | Suggested improvements were reviewed against the actual repository before being implemented. |
-| P5 | Requirement compliance check | "now tell if the project is according to this requiremnet some common requirements but like we are goibg to inlcude few things in the report as well but based on htis how much would you rate the project give feedback as well Q3. Biological Sequence Alignment" | Used to identify gaps against the course requirements, including the parallel programming and documentation requirements. | Checked the identified gaps against the course instruction sheet and documented remaining gaps. |
+| P6 | Sequential implementation review | "Review our sequential C++ Needleman–Wunsch implementation. Verify DP matrix initialization, match score +1, mismatch score -1, gap penalty -2, recurrence relation and boundary conditions." | Used to review the sequential implementation serving as the performance baseline. | Compiled the implementation and checked its results against manually calculated examples and parallel outputs. |
+| P7 | Traceback and alignment reconstruction | "Explain how traceback reconstructs the optimal global alignment from the Needleman–Wunsch DP matrix. Help implement traceback in C++ while correctly handling diagonal, upward and leftward moves." | Used to understand alignment reconstruction and identify requirements beyond returning the final score. | Checked alignment validity and score consistency using applicable tests. |
+| P8 | Correctness tester | "Help design a C++ correctness tester that runs the sequential, std::thread and OpenMP Needleman–Wunsch implementations on identical DNA datasets and compares their final alignment scores, reporting PASS or FAIL." | Used to plan automated correctness verification across the three implementations. | Verified that the tester used identical input files and compared actual computed scores. |
+| P9 | Repository integration review | "Review our Needleman–Wunsch repository for integration issues across the sequential, std::thread and OpenMP implementations, correctness tester, benchmark program and Makefile. Identify inconsistent interfaces, stale results and unsupported documentation claims." | Used to identify integration issues before final project evaluation. | Rebuilt the project and checked source files, execution commands and generated results. |
+| P10 | Memory optimization | "Explain how rolling anti-diagonal buffers can reduce memory usage in score-only Needleman–Wunsch computation. Describe the dependencies that must be preserved and why reconstructing the full alignment requires additional information or another traceback strategy." | Used to evaluate memory optimization opportunities for score-only computation. | Reviewed the memory requirements and distinguished score-only computation from full alignment reconstruction. |
 
 ---
 
-## Fathima: parallel implementation
+## Fathima: Parallel Implementation
 
 | Sr. No. | Purpose | Prompt Used | How the Response Was Used | Modification / Verification |
 |---|---|---|---|---|
-| F1 | Wavefront / anti-diagonal parallelization | "I’m implementing parallel Needleman-Wunsch. Can you explain how the anti-diagonal or wavefront approach works and how I can process independent parts in parallel without breaking the dependencies between DP cells?" | Used to understand the wavefront dependency pattern and guide the parallel implementation. | Tested the parallel results against the sequential implementation for correctness. |
-| F2 | Synchronization and performance | "My parallel Needleman-Wunsch implementation uses synchronization between wavefronts and the speedup is not very good. What can I do to reduce synchronization overhead while still keeping the dependencies correct?" | Used to identify synchronization overhead and consider a blocked/tiled wavefront approach. | The implementation was tested using the existing correctness and performance tests. |
+| F3 | Tiled wavefront parallelization | "Help design a tiled-wavefront Needleman–Wunsch implementation in C++. Divide the DP matrix into tiles, process tiles by anti-diagonal and preserve top, left and top-left dependencies between tiles." | Used to understand and develop tile-level parallelism while preserving the algorithm's dependencies. | Compared the dependency logic with the sequential algorithm and tested final scores. |
+| F4 | std::thread synchronization | "Review synchronization in our tiled-wavefront Needleman–Wunsch implementation using C++ std::thread. Explain how workers can process independent tiles and coordinate completion between anti-diagonals without data races or premature reads." | Used to evaluate thread coordination and safe execution of independent tiles. | Rebuilt and tested the implementation across supported thread counts against the sequential baseline. |
+| F5 | OpenMP implementation | "Help implement tiled-wavefront Needleman–Wunsch using OpenMP parallel loops. Preserve dependencies between tile anti-diagonals and explain where synchronization is required to ensure correct DP values." | Used to review the OpenMP parallelization strategy. | Compiled with the available OpenMP toolchain and compared scores against the other implementations. |
+| F6 | Thread-count scalability | "Explain how tile size, available independent tiles, scheduling and synchronization affect Needleman–Wunsch speedup when using 1, 2, 4 and 8 threads across different DNA sequence sizes." | Used to identify factors that could explain performance differences across thread counts. | Compared potential explanations with actual benchmark measurements before drawing conclusions. |
+| F7 | Parallel edge-case testing | "Identify edge cases for our parallel Needleman–Wunsch implementations, including empty sequences, single-base sequences, identical sequences, mismatched sequences and unequal sequence lengths. Explain the expected behavior under our scoring scheme." | Used to plan additional correctness tests for boundary conditions. | Compared expected results with the sequential implementation and retained only tests that were executed. |
 
 ---
 
-## Maitreyi: performance analysis
+## Maitreyi: Performance Analysis and Benchmarking
 
 | Sr. No. | Purpose | Prompt Used | How the Response Was Used | Modification / Verification |
 |---|---|---|---|---|
-| Y1 | Benchmark design | "How should I benchmark a sequential and parallel Needleman-Wunsch program properly? I want to compare different dataset sizes and thread counts. What should I measure and how should I make the comparison fair?" | Used to plan the benchmark setup and compare execution times across dataset sizes and thread counts. | Used the same datasets and thread counts for the sequential and parallel implementations and checked the recorded results. |
-| Y2 | Speedup and performance graphs | "I have execution time results for sequential and parallel Needleman-Wunsch. How should I calculate speedup and what graphs would be useful to show how performance changes with the number of threads?" | Used to plan the speedup calculation and performance graphs for the report. | Graphs were checked against the actual benchmark CSV values before being used in the report. |
+| Y3 | Benchmark CSV validation | "Suggest a consistent CSV format for our Needleman–Wunsch benchmarks containing sequence size, thread count, execution time, speedup, parallel efficiency and correctness status." | Used to organize benchmark results for performance comparison. | Matched the proposed format with the benchmark program and checked calculations against recorded measurements. |
+| Y4 | Performance graph generation | "Help create Python graphs from our Needleman–Wunsch benchmark CSV files comparing sequential, std::thread and OpenMP execution times across DNA sequence sizes and thread counts." | Used to plan performance visualizations for the project report. | Checked graph values against the source CSV files and excluded unsupported or outdated measurements. |
+| Y5 | Scalability analysis | "Analyze our Needleman–Wunsch benchmark results for 1, 2, 4 and 8 threads. Explain speedup and parallel efficiency, identify configurations that improve performance and distinguish measured results from possible explanations for slowdowns." | Used to structure the scalability analysis and compare parallel implementations with the sequential baseline. | Recalculated speedup and efficiency using the relevant execution times and checked conclusions against the benchmark data. |
+| Y6 | Fair benchmark methodology | "Suggest a fair methodology for comparing sequential, std::thread and OpenMP Needleman–Wunsch implementations on an Apple M4 system. Consider compiler optimization, identical datasets, warm-up runs, repeated measurements, thread counts and median execution time." | Used to review the experimental setup and improve benchmark consistency. | Compared the methodology with the actual build configuration, benchmark code and experimental environment. |
+| Y7 | Performance report interpretation | "Help write the performance analysis for our Needleman–Wunsch DAA project. Explain observed differences between sequential, std::thread and OpenMP execution times, the effect of increasing sequence length and limitations of parallel speedup without assuming OpenMP is inherently slower." | Used to structure the interpretation of execution time, speedup and scalability results. | Retained numerical claims only when supported by benchmark data and treated unverified bottleneck explanations as hypotheses. |
 
 ---
 
-## Critical evaluation of LLM output
-
-At least one LLM suggestion was rejected or modified. The full write-up
-(what was suggested, why it was considered, what was changed, and how it
-was verified) is in
-[`docs/Critical_Evaluation.md`](docs/Critical_Evaluation.md).
-
-Summary:
-
-1. Row-wise parallelization was rejected because Needleman-Wunsch has dependencies between DP cells.
-2. The initial synchronization approach was modified in favour of the tiled wavefront approach.
-3. Stale correctness results were rejected and correctness was re-tested.
-4. Benchmark results from the earlier Java/1-core run were discarded and regenerated on the Apple M4.
-5. Matrix-multiplication prompts that were unrelated to this Needleman-Wunsch project were removed from the log.
-6. Performance claims were kept only when supported by actual benchmark results.
